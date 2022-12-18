@@ -1,7 +1,7 @@
 from sqlalchemy import Column, ForeignKey, Integer, Text
 
-from app.models.base import CommonFields
 from app.core.db import Base
+from app.models.base import CommonFields
 
 
 class Donation(Base, CommonFields):

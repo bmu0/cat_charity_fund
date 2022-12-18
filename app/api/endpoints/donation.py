@@ -3,15 +3,17 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_async_session
+from app.core.user import current_superuser, current_user
 from app.crud.crud import donation_crud
-from app.schemas.donation import DonationCreate, DonationDB
-from app.core.user import current_user, current_superuser
 from app.models import User
+from app.schemas.donation import (DonationCreate, DonationDB,
+                                  DonationSuperuserDB)
+from app.services.investment import invest
 
 router = APIRouter()
 
 
-@router.post('/', response_model=DonationDB)
+@router.post('/', response_model=DonationDB, response_model_exclude_none=True,)
 async def create_donation(
         donation: DonationCreate,
         session: AsyncSession = Depends(get_async_session),
@@ -22,35 +24,42 @@ async def create_donation(
         # Передаём объект пользователя в метод создания объекта бронирования.
         donation, session, user
     )
+    new_donation = await invest(session, donation=new_donation)
+    await session.commit()
+    await session.refresh(new_donation)
     return new_donation
 
 
 @router.get(
     '/my',
     response_model=list[DonationDB],
+    response_model_exclude_none=True,
     dependencies=[Depends(current_user)],
     response_model_exclude={'user_id'}
 )
-async def get_all_reservations(
+async def get_all_donations(
         session: AsyncSession = Depends(get_async_session),
         user: User = Depends(current_user)
 ):
-    reservations = await donation_crud.get_multi(session)
-    return reservations
+    donations = await donation_crud.get_multi(session)
+    return donations
 
 
 @router.get(
     '/',
-    response_model=list[DonationDB],
+    response_model=list[DonationSuperuserDB],
+    dependencies=[Depends(current_superuser)],
+    response_model_exclude_none=True,
 )
-async def get_my_reservations(
+async def get_my_donations(
         session: AsyncSession = Depends(get_async_session),
+
         # В этой зависимости получаем обычного пользователя, а не суперюзера.
 ):
     # Сразу можно добавить докстринг для большей информативности.
     """Получает список всех бронирований для текущего пользователя."""
     # Вызываем созданный метод.
-    reservations = await donation_crud.get_multi(
+    donations = await donation_crud.get_multi(
         session=session
     )
-    return reservations
+    return donations
