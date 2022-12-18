@@ -41,9 +41,10 @@ async def create_new_charity_project(
         charity_project: CharityProjectCreate,
         session: AsyncSession = Depends(get_async_session),
 ):
-    """Только для суперюзеров."""
     await check_name_duplicate(charity_project.name, session)
-    charity_project = await charity_project_crud.create(charity_project, session)
+    charity_project = await charity_project_crud.create(
+        charity_project, session
+    )
     charity_project = await invest(session, charity_project=charity_project)
     await session.commit()
     await session.refresh(charity_project)
@@ -61,14 +62,18 @@ async def partially_update_charity_project(
         obj_in: CharityProjectUpdate,
         session: AsyncSession = Depends(get_async_session),
 ):
-    charity_project = await check_charity_project_closed(charity_project_id, session)
+    charity_project = await check_charity_project_closed(
+        charity_project_id, session
+    )
     await check_charity_project_update_values(
         session, obj_in
     )
     if obj_in.name is not None:
         await check_name_duplicate(obj_in.name, session)
     if obj_in.full_amount:
-        charity_project = await check_charity_project_amount(charity_project_id, session, obj_in.full_amount)
+        charity_project = await check_charity_project_amount(
+            charity_project_id, session, obj_in.full_amount
+        )
     charity_project = await charity_project_crud.update(
         charity_project, obj_in, session
     )
@@ -85,8 +90,16 @@ async def remove_charity_project(
         charity_project_id: int,
         session: AsyncSession = Depends(get_async_session),
 ):
-    charity_project = await check_charity_project_exists(charity_project_id, session)
-    charity_project = await check_charity_project_started(charity_project_id, session)
-    charity_project = await check_charity_project_closed(charity_project_id, session)
-    charity_project = await charity_project_crud.remove(charity_project, session)
+    charity_project = await check_charity_project_exists(
+        charity_project_id, session
+    )
+    charity_project = await check_charity_project_started(
+        charity_project_id, session
+    )
+    charity_project = await check_charity_project_closed(
+        charity_project_id, session
+    )
+    charity_project = await charity_project_crud.remove(
+        charity_project, session
+    )
     return charity_project

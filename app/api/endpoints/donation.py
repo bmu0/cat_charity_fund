@@ -13,15 +13,13 @@ from app.services.investment import invest
 router = APIRouter()
 
 
-@router.post('/', response_model=DonationDB, response_model_exclude_none=True,)
+@router.post('/', response_model=DonationDB, response_model_exclude_none=True)
 async def create_donation(
         donation: DonationCreate,
         session: AsyncSession = Depends(get_async_session),
-        # Получаем текущего пользователя и сохраняем в переменную user.
         user: User = Depends(current_user),
 ):
     new_donation = await donation_crud.create(
-        # Передаём объект пользователя в метод создания объекта бронирования.
         donation, session, user
     )
     new_donation = await invest(session, donation=new_donation)
@@ -38,8 +36,7 @@ async def create_donation(
     response_model_exclude={'user_id'}
 )
 async def get_all_donations(
-        session: AsyncSession = Depends(get_async_session),
-        user: User = Depends(current_user)
+        session: AsyncSession = Depends(get_async_session)
 ):
     donations = await donation_crud.get_multi(session)
     return donations
@@ -53,12 +50,7 @@ async def get_all_donations(
 )
 async def get_my_donations(
         session: AsyncSession = Depends(get_async_session),
-
-        # В этой зависимости получаем обычного пользователя, а не суперюзера.
 ):
-    # Сразу можно добавить докстринг для большей информативности.
-    """Получает список всех бронирований для текущего пользователя."""
-    # Вызываем созданный метод.
     donations = await donation_crud.get_multi(
         session=session
     )

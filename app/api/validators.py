@@ -6,10 +6,12 @@ from app.models import CharityProject, User
 
 
 async def check_charity_project_exists(
-        charity_project_id: int,
-        session: AsyncSession,
+    charity_project_id: int,
+    session: AsyncSession,
 ) -> CharityProject:
-    charity_project = await charity_project_crud.get(charity_project_id, session)
+    charity_project = await charity_project_crud.get(
+        charity_project_id, session
+    )
     if charity_project is None:
         raise HTTPException(
             status_code=404,
@@ -87,18 +89,16 @@ async def check_name_duplicate(
 async def check_charity_project_before_edit(
         charity_project_id: int,
         session: AsyncSession,
-        # Новый параметр корутины.
         user: User,
 ) -> CharityProject:
     charity_project = await charity_project_crud.get(
         obj_id=charity_project_id, session=session
     )
     if not charity_project:
-        raise HTTPException(status_code=404, detail='Бронь не найдена!')
-    # Новая проверка и вызов исключения.
+        raise HTTPException(status_code=404, detail='Запись не найдена!')
     if charity_project.user_id != user.id and not user.is_superuser:
         raise HTTPException(
             status_code=403,
-            detail='Невозможно редактировать или удалить чужую бронь!'
+            detail='Невозможно редактировать или удалить чужую запись!'
         )
     return charity_project
