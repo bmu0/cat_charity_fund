@@ -1,4 +1,3 @@
-# app/api/endpoints/reservaion.py
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -38,8 +37,7 @@ async def create_donation(
 async def get_all_donations(
         session: AsyncSession = Depends(get_async_session)
 ):
-    donations = await donation_crud.get_multi(session)
-    return donations
+    return await donation_crud.get_multi(session)
 
 
 @router.get(
@@ -51,7 +49,6 @@ async def get_all_donations(
 async def get_my_donations(
         session: AsyncSession = Depends(get_async_session),
 ):
-    donations = await donation_crud.get_multi(
+    return await donation_crud.get_multi(
         session=session
     )
-    return donations

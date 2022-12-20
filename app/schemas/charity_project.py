@@ -12,7 +12,7 @@ class CharityProjectBase(BaseModel):
     @validator('description')
     def description_cannot_be_null(cls, value):
         if not value:
-            raise ValueError('Имя переговорки не может быть пустым!')
+            raise ValueError('Описание не может быть пустым!')
         return value
 
     class Config:
